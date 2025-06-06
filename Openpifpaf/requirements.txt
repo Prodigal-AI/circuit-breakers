@@ -1,0 +1,6 @@
+flask
+torch
+torchvision
+openpifpaf
+numpy
+opencv-python

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Analysis Results</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(rgba(19, 18, 18, 0.9), rgba(77, 75, 75, 0.9)), 
+                        url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: #2c3e50;
+        }
+        .results-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin: 2rem auto;
+        }
+        .section-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            font-weight: 700;
+        }
+        .rep-count {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4a89dc;
+        }
+        .mistake-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .mistake-item:last-child {
+            border-bottom: none;
+        }
+        .video-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        video {
+            width: 100%;
+            border-radius: 8px;
+            background: #000;
+        }
+        .snapshot-card {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            margin-bottom: 1rem;
+        }
+        .snapshot-card:hover {
+            transform: translateY(-5px);
+        }
+        .snapshot-card img {
+            width: 100%;
+            height: auto;
+        }
+        .snapshot-label {
+            padding: 0.75rem;
+            background-color: white;
+            text-align: center;
+            font-weight: 600;
+        }
+        .debug-info {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+        .error-message {
+            color: #e74c3c;
+            background-color: #fadbd8;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .badge-exercise {
+            background-color: #4a89dc;
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="results-container">
+                    <div class="text-center mb-4">
+                        <span class="badge badge-exercise mb-2">{{ exercise_type|title }}</span>
+                        <h1>Exercise Analysis Results</h1>
+                    </div>
+                    
+                    <div class="section-card">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h2><i class="fas fa-chart-line me-2"></i>Performance Summary</h2>
+                                <p class="lead">Your exercise analysis is complete!</p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <div class="rep-count">{{ rep_count }} Reps</div>
+                            </div>
+                        </div>
+                        
+                        {% if mistakes %}
+                            <div class="mt-4">
+                                <h3><i class="fas fa-exclamation-triangle me-2"></i>Detected Mistakes</h3>
+                                <div class="list-group mt-3">
+                                    {% for mistake in mistakes %}
+                                        <div class="mistake-item">
+                                            <i class="fas fa-circle-exclamation text-warning me-2"></i>{{ mistake }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-success mt-4">
+                                <i class="fas fa-check-circle me-2"></i>No significant mistakes detected!
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="section-card">
+                        <h2><i class="fas fa-video me-2"></i>Keypoints Visualization</h2>
+                        {% if keypoints_video %}
+                            <div class="video-container mt-3">
+                                <video controls autoplay muted playsinline class="w-100">
+                                    <source src="{{ url_for('serve_snapshot', filename=keypoints_video) }}" type="video/mp4">
+                                    Your browser does not support HTML5 video.
+                                </video>
+                                <div class="debug-info mt-3">
+                                    <p><strong>Video source:</strong> {{ url_for('serve_snapshot', filename=keypoints_video) }}</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="error-message mt-3">
+                                <i class="fas fa-exclamation-circle me-2"></i>Keypoints visualization not available
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if snapshots %}
+                    <div class="section-card">
+                        <h2><i class="fas fa-camera me-2"></i>Mistake Snapshots</h2>
+                        <p class="text-muted">Mistakes detected at frames: {{ mistake_frames|join(', ') }}</p>
+                        <div class="row mt-4">
+                            {% for snapshot in snapshots %}
+                                <div class="col-sm-6 col-md-4 col-lg-3">
+                                    <div class="snapshot-card">
+                                        <img src="{{ url_for('serve_snapshot', filename=snapshot) }}" 
+                                             alt="Mistake at frame {{ snapshot.split('_')[-1].split('.')[0] }}" 
+                                             class="img-fluid">
+                                        <div class="snapshot-label">
+                                            Frame {{ snapshot.split('_')[-1].split('.')[0] }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelector('video')?.addEventListener('error', function(e) {
+            console.error('Video error:', this.error);
+            alert('Video failed to load. Please check console for details.');
+        });
+        document.querySelector('video')?.addEventListener('loadedmetadata', function() {
+            console.log('Video metadata loaded successfully');
+        });
+    </script>
+</body>
+</html>
